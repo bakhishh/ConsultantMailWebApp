@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Excel Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 90%;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        .button-container-top,
+        .button-container-bottom {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .button-container-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dropdown-container {
+            margin-right: 20px;
+        }
+        .dropdown-container select {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .button-container-top button,
+        .button-container-bottom button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        .button-container-top button:hover,
+        .button-container-bottom button:hover {
+            background-color: #218838;
+        }
+        .radio-options {
+            display: none;
+            margin-top: 10px;
+        }
+        .radio-options input[type="radio"] {
+            margin-right: 10px;
+        }
+        table {
+            width: 90%;
+            max-width: 100%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            word-wrap: break-word;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="button-container-top">
+            <form method="post" id="consultantForm" style="display: flex; align-items: center;">
+                {% csrf_token %}
+                <div class="dropdown-container" onclick="hideRadioOptions()">
+                    <select name="consultant_id" id="consultantSelect">
+                        <option value="" disabled selected>Danışman seçiniz</option>
+                        {% for consultant in consultants %}
+                            <option value="{{ consultant.0 }}">{{ consultant.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="button" onclick="showRadioOptions('send_to_consultant')">Danışmana gönder</button>
+                <button type="button" onclick="showRadioOptions('send_to_consultant_and_assistant')">Danışmana ve Asistana gönder</button>
+            </form>
+        </div>
+        <div class="radio-options" id="radioOptions">
+            <input type="radio" id="ara" name="noteType" value="Ara Rapor">
+            <label for="ara">Ara Rapor</label>
+            <input type="radio" id="final" name="noteType" value="Final">
+            <label for="final">Final</label>
+            <input type="radio" id="butunleme" name="noteType" value="Bütünleme">
+            <label for="butunleme">Bütünleme</label>
+            <button type="button" onclick="submitForm()">Submit</button>
+        </div>
+        <div>
+            {{ html_table|safe }}
+        </div>
+        <div class="button-container-bottom">
+            <button class="button" onclick="showRadioOptions('send_to_all_consultant')">Tüm Danışmanlara gönder</button>
+        </div>
+        <script>
+            var selectedAction = '';
+            var selectedId = '';
+
+            function showRadioOptions(action) {
+                selectedAction = action;
+                document.getElementById('radioOptions').style.display = 'block';
+                
+                if (action === 'send_to_all_consultant') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+
+            function hideRadioOptions() {
+                document.getElementById('radioOptions').style.display = 'none';
+            }
+        
+            function submitForm() {
+                var consultantId = document.getElementById('consultantSelect').value;
+                var noteType = document.querySelector('input[name="noteType"]:checked').value;
+                
+                if(selectedAction !== 'send_to_one'){
+                    if (selectedAction !== 'send_to_all_consultant' && !consultantId) {
+                        alert('Please select a consultant.');
+                        return;
+                    }
+                }
+                
+                
+                if (!noteType) {
+                    alert('Please select a note type.');
+                    return;
+                }
+                
+                document.getElementById('radioOptions').style.display = 'none';
+
+                var form = document.getElementById('consultantForm');
+        
+                if (selectedAction === 'send_to_consultant') {
+                    form.action = "{% url 'send_to_consultant' 0 %}".replace("0", consultantId) + "?noteType=" + noteType;
+                } else if (selectedAction === 'send_to_consultant_and_assistant') {
+                    form.action = "{% url 'send_to_consultant_and_assistant' 0 %}".replace("0", consultantId) + "?noteType=" + noteType;
+                } else if (selectedAction === 'send_to_all_consultant') {
+                    form.action = "{% url 'send_to_all_consultant' %}" + "?noteType=" + noteType;
+                } else if (selectedAction === 'send_to_one') {
+                    form.action = "{% url 'send_to_one' 0 %}".replace("0", selectedId) + "?noteType=" + noteType;
+                }
+        
+                form.submit();
+            }
+            
+            function sendToOne(id) {
+                selectedId = id;
+                showRadioOptions('send_to_one');
+            }
+
+            
+
+            document.addEventListener("DOMContentLoaded", function() {
+                {% if messages %}
+                    {% for message in messages %}
+                        alert("{{ message|escapejs }}");
+                    {% endfor %}
+                {% endif %}
+            });
+        </script>
+    </div>
+</body>
+
+
+
+</html>
