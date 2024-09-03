@@ -1,5 +1,5 @@
 # ConsultantMailWebApp
-This Django application is designed to facilitate communication between project consultants, assistants, and students by automating the email notification process. The app reads data from a Excel file containing information about student projects,  including project links , student IDs, consultants, and assistants.
+This Django application is designed to facilitate communication between project consultants, assistants, and students by automating the email notification process. The app reads data from a Excel file containing information about student projects,  including project links , student IDs, consultants, and assistants. This project was designed to streamline communication by ensuring that relevant parties received the appropriate reports (such as Midterm Report, Final Report, and Make-up Report) in a timely and organized manner.
 <br/>
 ![Screenshot 2024-08-21 044258](https://github.com/user-attachments/assets/f88699f5-4582-4d68-af66-da39aa2aa7b5)
 
